@@ -207,7 +207,7 @@ latest: digest: sha256:b33e8ed80f95c7b6ca97cd72e15c29e78dbc58a49a4efb2d884f3265e
 17:57PM daniel@daniel-ThinkPad-W540:~ $ docker logout
 Removing login credentials for https://index.docker.io/v1/
 ```
-Now I'm logged out of the Docker Hub; and, for demo, I'll remove the second image we created, and -- having removed it from our local repository of  images --  I can re-download it from the Docker Hub as a "normal" user ostensibly without all the above. So... we're downloading the image "fresh" from Docker Hub.
+Now I'm logged out of the Docker Hub; and, for demo, I'll remove the second image we created, and -- having removed it from our local repository of  images --  I can re-download it from the Docker Hub as a "normal" user lacking the history of this session. So... we're downloading the image "fresh" from Docker Hub.
 ```
 
 17:57PM daniel@daniel-ThinkPad-W540:~ $ docker rmi dwmoore/myalpine2
