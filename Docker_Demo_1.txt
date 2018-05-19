@@ -1,0 +1,278 @@
+
+# DOCKER Demo #1 :
+#
+#  showing how to download (pull) , run, and change an image - also saving those
+#  changes in a new image and saving them at DOCKER HUB (http://hub.docker.com/)
+#
+#  Disclaimer. One should really use (and build from) a Dockerfile , however the
+#              purpose of this demo is really to show the basic mechanics of the
+#              command line process.
+
+#              We'll save Dockerfile for the Demo # 2 . Watch this space !
+
+#
+#   So let's start:
+
+#### -- Downloading basic Alpine Linux image (It doesn't have perl or python, but
+   #    we will install them  :)
+
+17:29PM daniel@daniel-ThinkPad-W540:~ $ docker pull alpine:latest
+latest: Pulling from library/alpine
+ff3a5c916c92: Pull complete 
+Digest: sha256:7df6db5aa61ae9480f52f0b3a06a140ab98d427f86d8d5de0bedab9b8df6b1c0
+Status: Downloaded newer image for alpine:latest
+
+#### -- Run the image
+
+ERROR(127) 17:29PM daniel@daniel-ThinkPad-W540:~ $ docker run -it alpine:latest /bin/sh
+/ # perl
+/bin/sh: perl: not found
+/ # python
+/bin/sh: python: not found
+
+#### -- updating alpine package index & installing packages inside the docker.
+    # The first time, we'll be adding these packages:
+    #   perl  ,  python  ,  perl-db  ,  perl-doc
+
+/ # apk update
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/community/x86_64/APKINDEX.tar.gz
+v3.7.0-165-g5692f7146c [http://dl-cdn.alpinelinux.org/alpine/v3.7/main]
+v3.7.0-167-g6ba755ebb3 [http://dl-cdn.alpinelinux.org/alpine/v3.7/community]
+OK: 9051 distinct packages available
+
+/ # apk add perl
+(1/2) Installing libbz2 (1.0.6-r6)
+(2/2) Installing perl (5.26.2-r0)
+Executing busybox-1.27.2-r7.trigger
+OK: 41 MiB in 13 packages
+/ # apk add perl-db
+(1/2) Installing db (5.3.28-r0)
+(2/2) Installing perl-db (0.55-r1)
+OK: 43 MiB in 15 packages
+/ # apk add python
+(1/9) Installing expat (2.2.5-r0)
+(2/9) Installing libffi (3.2.1-r4)
+(3/9) Installing gdbm (1.13-r1)
+(4/9) Installing ncurses-terminfo-base (6.0_p20171125-r0)
+(5/9) Installing ncurses-terminfo (6.0_p20171125-r0)
+(6/9) Installing ncurses-libs (6.0_p20171125-r0)
+(7/9) Installing readline (7.0.003-r0)
+(8/9) Installing sqlite-libs (3.21.0-r0)
+(9/9) Installing python2 (2.7.14-r2)
+Executing busybox-1.27.2-r7.trigger
+OK: 90 MiB in 24 packages
+/ # apk add python3
+(1/2) Installing xz-libs (5.2.3-r1)
+(2/2) Installing python3 (3.6.3-r9)
+Executing busybox-1.27.2-r7.trigger
+OK: 141 MiB in 26 packages
+/ # apk add perl-doc
+(1/1) Installing perl-doc (5.26.2-r0)
+OK: 157 MiB in 27 packages
+
+#### -- oops, we stopped the container instead of detaching (i did a control-D instead
+   #    of a control-P / control-Q) so the container is stopped. So it won't show up
+   #    on a docker ps without "-a" (all) option 
+
+/ # 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS                     PORTS               NAMES
+
+/ # 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS                     PORTS               NAMES
+547a2b1a747b        alpine:latest       "/bin/sh"           52 seconds ago       Exited (0) 7 seconds ago                       reverent_goldwasser
+
+17:30PM daniel@daniel-ThinkPad-W540:~ $ docker attach reverent_goldwasser
+You cannot attach to a stopped container, start it first
+
+#### -- because it's stopped, we can't re-attach yet, but never fear ... we can
+   #    restart it easily
+
+ERROR(1) 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker restart reverent_goldwasser 
+reverent_goldwasser
+
+17:30PM daniel@daniel-ThinkPad-W540:~ $ docker attach reverent_goldwasser
+
+#### -- Inside the container again . Let's play around and make sure 
+   #    the "good stuff" works.
+
+/ # perl -de 1
+
+Loading DB routines from perl5db.pl version 1.51
+Editor support available.
+
+Enter h or 'h h' for help, or 'man perldebug' for more help.
+
+main::(-e:1):	1
+  DB<1> p ++($x=3)
+4
+  DB<2>             <<< -- Control-D out of Perl
+
+/ # python3
+Python 3.6.3 (default, Nov 21 2017, 14:55:19) 
+[GCC 6.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import io
+>>> s=StringIO()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'StringIO' is not defined
+>>> s=io.StringIO()
+>>> print ("hello, {}".format("world"), file=s)
+>>> s.getvalue()
+'hello, world\n'
+>>>                    <<< --- Control-D out of python
+/ # exit
+
+#### -- We exited Python , and the docker container itself, and now we can save
+   #    our new image complete with Perl and Python installed! This is done with a
+   #    'commit' and a 'push' . Note that I'm already logged into the Docker Hub, so
+   #    you won't see me logging in again, but see further down this session for an
+   #    example of the docker login. Also note, below, I'm giving the newly created
+   #    image a name suitable for pushing.  'dwmoore' is the login and name of my
+   #    Docker Hub account
+   # ... If in the meantime we forgot the temporary name of the running instance,
+       #  we can get it again with "docker ps -a".  The SHA or a truncated form 
+       #  (547a2b1a747b or even "547a") could also be used for the randomly chosen name
+       #  which the docker daemon gave to our container instance, "reverent_goldwasser"
+
+ERROR(127) 17:46PM daniel@daniel-ThinkPad-W540:~ $ docker commit reverent_goldwasser  dwmoore/myalpine
+sha256:c775bdd39a067c74593175a185c82f7f361660b23b3c49cdbd6aa50e95631e9c
+17:46PM daniel@daniel-ThinkPad-W540:~ $ 
+17:46PM daniel@daniel-ThinkPad-W540:~ $ docker images
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+dwmoore/myalpine        latest              c775bdd39a06        13 seconds ago      141MB
+  ...
+
+17:47PM daniel@daniel-ThinkPad-W540:~ $ docker push dwmoore/myalpine:latest
+The push refers to repository [docker.io/dwmoore/myalpine]
+fd3261220a5f: Pushed 
+cd7100a72410: Mounted from dwmoore/myalpo3 
+latest: digest: sha256:1d501fe2edec28dc2501b020b59c68de19571232b717ec16d728e7413306b76d size: 740
+
+#### -- I could now pull from hub.docker.com, but since it's local I don't have to.  (If you were 
+   #    jumping into the example at this point, you could actually "docker pull dwmoore/myalpine"
+   #    and continue with me, and all that I'm doing here:
+
+   #  OK, adding another package to the image now. This just gives us the 'col' utility:
+
+17:47PM daniel@daniel-ThinkPad-W540:~ $ docker run -it dwmoore/myalpine /bin/sh
+ 
+/ # apk add heirloom-doctools
+(1/3) Installing libgcc (6.4.0-r5)
+(2/3) Installing libstdc++ (6.4.0-r5)
+(3/3) Installing heirloom-doctools (160308-r6)
+Executing busybox-1.27.2-r7.trigger
+OK: 162 MiB in 30 packages
+
+#### --  I use "col" command to convert a manpage to ASCII text and store it in /tmp
+   #  -  That file will hang around, and be committed with our next "myalpine2" image....
+
+/ # perldoc Compress::Zlib |col -b >/tmp/compress_zlib.txt
+/ # head -30 /tmp/compress_zlib.txt 
+1mNAMEm
+    Compress::Zlib - Interface to zlib compression library
+
+1mSYNOPSISm
+	use Compress::Zlib ;
+
+	($d, $status) =	deflateInit( [OPT] ) ;
+	$status	= $d->deflate($input, $output) ;
+	$status	= $d->flush([$flush_type]) ;
+	$d->deflateParams(OPTS)	;
+	$d->deflateTune(OPTS) ;
+	$d->dict_adler() ;
+	$d->crc32() ;
+
+#### -- I can now exit (or Control-D) from the container and commit the image
+   #    with our second set of  changes:
+
+17:56PM daniel@daniel-ThinkPad-W540:~ $ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                       PORTS               NAMES
+acc0d6f6c304        dwmoore/myalpine    "/bin/sh"           3 minutes ago       Exited (0) 4 seconds ago                         trusting_brown
+547a2b1a747b        alpine:latest       "/bin/sh"           26 minutes ago      Exited (127) 9 minutes ago                       reverent_goldwasser
+
+#### -- OK, commit our second version of this container in preparation
+   #    for pushing to Docker Hub
+
+17:56PM daniel@daniel-ThinkPad-W540:~ $ docker commit trusting_brown  dwmoore/myalpine2
+sha256:8e2451a27f2033ac6035b1b312487998c887cb384a8235a87f7d925fa2057e8e
+
+#### -- in the interest of the demonstration's being "complete - ish",
+   #    I'll now log out of the docker hub, and then log back in again.
+
+ERROR(130) 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker logout 
+Removing login credentials for https://index.docker.io/v1/
+
+17:56PM daniel@daniel-ThinkPad-W540:~ $ docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: dwmoore
+Password:         <<<--- oops, entered either a blank or the wrong password ;)
+ERROR(1) 17:56PM daniel@daniel-ThinkPad-W540:~ $ 
+ERROR(1) 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker logout 
+Not logged in to https://index.docker.io/v1/
+
+#### -- No kidding. my bad! (But I had to show a FAIL so that, uhm ...
+   #    you could see what one looked like.   ;-)
+   #    So, let's do it for real here:
+
+17:56PM daniel@daniel-ThinkPad-W540:~ $ docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: dwmoore
+Password:               [[ <<< ----password was invisibly entered here ]]
+Login Succeeded
+
+17:57PM daniel@daniel-ThinkPad-W540:~ $ docker push dwmoore/myalpine2
+The push refers to repository [docker.io/dwmoore/myalpine2]
+89a772a6c355: Pushed 
+fd3261220a5f: Mounted from dwmoore/myalpine 
+cd7100a72410: Mounted from dwmoore/myalpine 
+latest: digest: sha256:b33e8ed80f95c7b6ca97cd72e15c29e78dbc58a49a4efb2d884f3265e78cbff5 size: 951
+
+17:57PM daniel@daniel-ThinkPad-W540:~ $ docker logout
+Removing login credentials for https://index.docker.io/v1/
+
+#### -- Now I'm logged out of the Docker Hub; for demo, I'll remove the second 
+   #    image we created, and -- having removed it from our local repository of
+   #    images --  I can re-download it from the Docker Hub as a "normal" user
+   #    not logged into my 'dwmoore' Hub account
+
+17:57PM daniel@daniel-ThinkPad-W540:~ $ docker rmi dwmoore/myalpine2
+Untagged: dwmoore/myalpine2:latest
+Untagged: dwmoore/myalpine2@sha256:b33e8ed80f95c7b6ca97cd72e15c29e78dbc58a49a4efb2d884f3265e78cbff5
+Deleted: sha256:8e2451a27f2033ac6035b1b312487998c887cb384a8235a87f7d925fa2057e8e
+Deleted: sha256:d769b49f69b87730b4c4226bb92c8b8f858ead966bbbd635963c4c5dd3205402
+
+17:57PM daniel@daniel-ThinkPad-W540:~ $ docker pull dwmoore/myalpine2
+Using default tag: latest
+latest: Pulling from dwmoore/myalpine2
+ff3a5c916c92: Already exists 
+3c121a45c785: Already exists 
+9cedeb8198ff: Pull complete 
+Digest: sha256:b33e8ed80f95c7b6ca97cd72e15c29e78dbc58a49a4efb2d884f3265e78cbff5
+Status: Downloaded newer image for dwmoore/myalpine2:latest
+
+17:57PM daniel@daniel-ThinkPad-W540:~ $ docker run -it dwmoore/myalpine2
+/ # ls /tmp
+cA3mvc9uuC         compress_zlib.txt
+/ # exit
+
+#### --- and of course, the compress_zlib.txt "ASCII-ized man page" still 
+   #      hangs around in '/tmp', because it, like the col command and the
+   #      rest of the heirloom-doctools package, is all a part of dwmoore/myalpine2
+
+#### So the overall cycle is: 
+   #      (1) Log in to Docker Hub & make your account & password
+   #      (2) Pull a fresh Linux image (could be Ubuntu, etc; here it was Alpine)
+   #      (3) Run the image, make changes
+   #      (4) If you ran it with "-it", you can detach with ^P-^Q; then re-attach
+   #           to the still-running container when/if desired
+   #      (5) After changes are complete, "exit" or ^D out of the container
+   #      (6) The container's inactive, so it doesn't show up on "docker ps" but
+   #            does if you say "docker ps -a"; Now you can * commit * it locally.
+   #      (7) Commit and and the same time, give it the name of your hub plus "/"
+   #            and an identifying image name. eg "dwmoore/myalpine"
+   #      (8) Do "docker login" from the command line, and then "docker push" to
+   #            upload your image to Docker Hub for all the world to enjoy.
+
+
