@@ -120,7 +120,7 @@ NameError: name 'StringIO' is not defined
 
 We exited Python , and the docker container itself, and now we can save     our new image complete with Perl and Python installed! This is done with a  'commit' and, then (if we want the image saved on Docker Hub) a 'push' . Note that I'm already logged into docker hub, so       you won't see me logging in again, but see further down this session for an example of the docker login. Also note, below, I'm giving the newly created     image a name suitable for pushing.  'dwmoore' is the login and name of my Docker Hub account;  'myalpine' is our chosen new image name.  Once the changes
 are **commit**ted and **push**ed up to the Hub, they are available in the new image, conveniently and by name, to be **pull**ed by others and instantiated in further running instances.
- 
+
 If in the meantime we forgot the temporary name of our currently running instance,   we can get it again with `docker ps -a`.  The SHA or a truncated form  (**547a2b1a747b** or even just **547a**) could also be used for the randomly chosen name which the docker daemon gave to our container instance, "reverent_goldwasser"
  ```
 
@@ -137,7 +137,7 @@ If in the meantime we forgot the temporary name of our currently running instanc
  fd3261220a5f: Pushed
  [...]
  ```
- I could now pull from hub.docker.com, but since it's local I don't have to.  (If you were   jumping into the example at this point, you could actually "docker pull dwmoore/myalpine" and continue with me, and all that I'm doing here:  OK, adding another package to the image now. This just gives us the 'col' utility:
+ I could now pull from hub.docker.com, but since it's local I don't have to.  (If you were   jumping into the example at this point, you could issue the command `docker pull dwmoore/myalpine` and continue with me, and all that I'm doing here:  OK, adding another package to the image now. This just gives us the 'col' utility:
 ```
 
 17:47PM daniel@daniel-ThinkPad-W540:~ $ docker run -it dwmoore/myalpine /bin/sh
@@ -189,19 +189,8 @@ I'll now use "col" command to convert a manpage to ASCII text and store it in /t
 In the interest of the completeness for this demo session,  I'll now log out of the docker hub, and then log back in again.
 
 ```
-
-17:56PM daniel@daniel-ThinkPad-W540:~ $ docker login
-Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
-Username: dwmoore
-Password:         <<<--- oops, entered either a blank or the wrong password ;)
-ERROR(1) 17:56PM daniel@daniel-ThinkPad-W540:~ $
 ERROR(1) 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker logout
-Not logged in to https://index.docker.io/v1/
-```
-Ah, no kidding! We aren't logged in.
-So, we'll log in and push:
-```
-
+Removing login credentials for https://index.docker.io/v1/
 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker login
 Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
 Username: dwmoore
