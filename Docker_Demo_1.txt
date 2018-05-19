@@ -8,13 +8,14 @@
 #              purpose of this demo is really to show the basic mechanics of the
 #              command line process.
 
-#              We'll save Dockerfile for the Demo # 2 . Watch this space !
+#              We'll reserve the subject of Dockerfiles for Demo # 2 ... 
+#                 (Watch this space !)
 
 #
-#   So let's start:
 
-#### -- Downloading basic Alpine Linux image (It doesn't have perl or python, but
-   #    we will install them  :)
+#### -- Download basic Alpine Linux image (It doesn't have perl or python, but
+   #    we will install them from packages via APK and persist the changes using 
+   #    docker commands
 
 17:29PM daniel@daniel-ThinkPad-W540:~ $ docker pull alpine:latest
 latest: Pulling from library/alpine
@@ -30,9 +31,9 @@ ERROR(127) 17:29PM daniel@daniel-ThinkPad-W540:~ $ docker run -it alpine:latest 
 / # python
 /bin/sh: python: not found
 
-#### -- updating alpine package index & installing packages inside the docker.
-    # The first time, we'll be adding these packages:
-    #   perl  ,  python3  ,  perl-db  ,  perl-doc
+#### -- While inside the container, update alpine package index & install packages.
+   #    The first time, we'll be adding :
+   #       perl  ,  python3  ,  perl-db  ,  perl-doc
 
 / # apk update
 fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/main/x86_64/APKINDEX.tar.gz
@@ -71,9 +72,9 @@ OK: 141 MiB in 26 packages
 (1/1) Installing perl-doc (5.26.2-r0)
 OK: 157 MiB in 27 packages
 
-#### -- oops, we stopped the container instead of detaching (i did a control-D instead
-   #    of a control-P / control-Q) so the container is stopped. So it won't show up
-   #    on a docker ps without "-a" (all) option
+#### -- Well, oops, we stopped the container instead of detaching (did a control-D instead
+   #    of a control-P + control-Q) so the container is stopped. So it won't show up
+   #    on a docker ps without the "-a" (all) option
 
 / # 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS                     PORTS               NAMES
@@ -85,16 +86,15 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker attach reverent_goldwasser
 You cannot attach to a stopped container, start it first
 
-#### -- because it's stopped, we can't re-attach yet, but never fear ... we can
-   #    restart it easily
+#### -- Never fear, we can restart and then reattach:
 
 ERROR(1) 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker restart reverent_goldwasser
 reverent_goldwasser
 
 17:30PM daniel@daniel-ThinkPad-W540:~ $ docker attach reverent_goldwasser
 
-#### -- Inside the container again . Let's play around and make sure
-   #    the "good stuff" works.
+#### -- Inside the container again . Let's play around and ensure the function of
+   #    the packages we installed.
 
 / # perl -de 1
 
@@ -126,17 +126,19 @@ NameError: name 'StringIO' is not defined
 
 #### -- We exited Python , and the docker container itself, and now we can save
    #    our new image complete with Perl and Python installed! This is done with a
-   #    'commit' and a 'push' . Note that I'm already logged into the Docker Hub, so
-   #    you won't see me logging in again, but see further down this session for an
-   #    example of the docker login. Also note, below, I'm giving the newly created
+   #    'commit' and a 'push' . In my original session , repeated here, I was already
+   #    logged into the Docker Hub (the session persists between logins) so right here
+   #    you won't see me logging in again, but see further down the page  for an
+   #    example of a "docker login". Also note, below, I'm giving the newly created
    #    image a name suitable for pushing.  'dwmoore' is the login and name of my
-   #    Docker Hub account, and ''myalpine' will be the image name. Once established,
+   #    Docker Hub account. (You'll want to substitute your own name, once you've
+   #    created your account. 'myalpine' will be the image name. Once established,
    #    and pushed to the hub, the image can be downloaded, and further instances run.
    
-   # ... If in the meantime we forgot the temporary name of our current running instance,
-       #  we can get it again with "docker ps -a".  The SHA or a truncated form
-       #  (547a2b1a747b or even "547a") could also be used for the randomly chosen name
-       #  which the docker daemon gave to our container instance, "reverent_goldwasser"
+   #  If in the meantime we forgot the temporary name of our current running instance,
+   #  we can get it again with "docker ps -a".  The SHA or a truncated form
+   #  (547a2b1a747b or even "547a") could also be used for the randomly chosen name
+   #  which the docker daemon gave to our container instance, "reverent_goldwasser"
 
 ERROR(127) 17:46PM daniel@daniel-ThinkPad-W540:~ $ docker commit reverent_goldwasser  dwmoore/myalpine
 sha256:c775bdd39a067c74593175a185c82f7f361660b23b3c49cdbd6aa50e95631e9c
@@ -152,11 +154,11 @@ fd3261220a5f: Pushed
 cd7100a72410: Mounted from dwmoore/myalpo3
 latest: digest: sha256:1d501fe2edec28dc2501b020b59c68de19571232b717ec16d728e7413306b76d size: 740
 
-#### -- I could now pull from hub.docker.com, but since it's local I don't have to.  (If you were
+#### -- We could now pull from hub.docker.com, but since it's local we don't have to.  (If you were
    #    jumping into the example at this point, you could actually "docker pull dwmoore/myalpine"
    #    and continue with me, and all that I'm doing here:
 
-   #  OK, adding another package to the image now. This just gives us the 'col' utility:
+#### -- OK, adding another package to the image now, just to provide the 'col' utility:
 
 17:47PM daniel@daniel-ThinkPad-W540:~ $ docker run -it dwmoore/myalpine /bin/sh
 
@@ -167,8 +169,8 @@ latest: digest: sha256:1d501fe2edec28dc2501b020b59c68de19571232b717ec16d728e7413
 Executing busybox-1.27.2-r7.trigger
 OK: 162 MiB in 30 packages
 
-#### --  I use "col" command to convert a manpage to ASCII text and store it in /tmp
-   #  -  That file will hang around, and be committed with our next "myalpine2" image....
+#### --  Now use "col" command to convert a manpage to ASCII text and store it in /tmp .
+   #     That file will hang around, and be committed with our next "myalpine2" image....
 
 / # perldoc Compress::Zlib |col -b >/tmp/compress_zlib.txt
 / # head -30 /tmp/compress_zlib.txt
@@ -186,7 +188,7 @@ OK: 162 MiB in 30 packages
 	$d->dict_adler() ;
 	$d->crc32() ;
 
-#### -- I can now exit (or Control-D) from the container and commit the image
+#### -- We can now exit (or Control-D) from the container and commit the image
    #    with our second set of  changes:
 
 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker ps -a
@@ -200,8 +202,8 @@ acc0d6f6c304        dwmoore/myalpine    "/bin/sh"           3 minutes ago       
 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker commit trusting_brown  dwmoore/myalpine2
 sha256:8e2451a27f2033ac6035b1b312487998c887cb384a8235a87f7d925fa2057e8e
 
-#### -- in the interest of the demonstration's being "complete - ish",
-   #    I'll now log out of the docker hub, and then log back in again.
+#### -- In the interest of the demonstration's being "complete - ish",
+   #    we now log out of the docker hub, and then log back in again.
 
 ERROR(130) 17:56PM daniel@daniel-ThinkPad-W540:~ $ docker logout
 Removing login credentials for https://index.docker.io/v1/
@@ -234,10 +236,10 @@ latest: digest: sha256:b33e8ed80f95c7b6ca97cd72e15c29e78dbc58a49a4efb2d884f3265e
 17:57PM daniel@daniel-ThinkPad-W540:~ $ docker logout
 Removing login credentials for https://index.docker.io/v1/
 
-#### -- Now I'm logged out of the Docker Hub; for demo, I'll remove the second
-   #    image we created, and -- having removed it from our local repository of
-   #    images --  I can re-download it from the Docker Hub as a "normal" user
-   #    not logged into my 'dwmoore' Hub account
+#### -- Since we're logged out of the Docker Hub , let's try also deleting the
+   #    local copy of the image we created,  we can re-download it from the 
+   #    Docker Hub just as any new user would, coming
+   #    into this situation lacking all the history we've just "made"....
 
 17:57PM daniel@daniel-ThinkPad-W540:~ $ docker rmi dwmoore/myalpine2
 Untagged: dwmoore/myalpine2:latest
