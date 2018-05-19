@@ -274,5 +274,6 @@ cA3mvc9uuC         compress_zlib.txt
    #            and an identifying image name. eg "dwmoore/myalpine"
    #      (8) Do "docker login" from the command line, and then "docker push" to
    #            upload your image to Docker Hub for all the world to enjoy.
-
+   #      (9) Another useful command is "docker images"  - lists what images you've
+   #            got in your local store -- whether pulled or created by you
 
