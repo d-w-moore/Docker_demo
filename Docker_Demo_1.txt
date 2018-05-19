@@ -50,7 +50,7 @@ OK: 41 MiB in 13 packages
 (1/2) Installing db (5.3.28-r0)
 (2/2) Installing perl-db (0.55-r1)
 OK: 43 MiB in 15 packages
-/ # apk add python
+/ # apk add python3
 (1/9) Installing expat (2.2.5-r0)
 (2/9) Installing libffi (3.2.1-r4)
 (3/9) Installing gdbm (1.13-r1)
