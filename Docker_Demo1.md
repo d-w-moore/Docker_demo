@@ -8,7 +8,7 @@
 
 - We'll save Dockerfile for the Demo # 2 . Watch this space !
 
-We first download (ie *pull*) a very basic "Alpine" Linux image
+## Download (ie *pull*) a very basic "Alpine" Linux image
 ```
 17:29PM daniel@daniel-ThinkPad-W540:~ $ docker pull alpine:latest
 latest: Pulling from library/alpine
@@ -118,8 +118,10 @@ NameError: name 'StringIO' is not defined
 / # exit
 ```
 
-We exited Python , and the docker container itself, and now we can save     our new image complete with Perl and Python installed! This is done with a  'commit' and, then (if we want the image saved on Docker Hub) a 'push' . Note that I'm already logged into docker hub, so       you won't see me logging in again, but see further down this session for an example of the docker login. Also note, below, I'm giving the newly created     image a name suitable for pushing.  'dwmoore' is the login and name of my
- Docker Hub account  ... If in the meantime we forgot the temporary name of the running instance,   we can get it again with `docker ps -a`.  The SHA or a truncated form  (**547a2b1a747b** or even just **547a**) could also be used for the randomly chosen name which the docker daemon gave to our container instance, "reverent_goldwasser"
+We exited Python , and the docker container itself, and now we can save     our new image complete with Perl and Python installed! This is done with a  'commit' and, then (if we want the image saved on Docker Hub) a 'push' . Note that I'm already logged into docker hub, so       you won't see me logging in again, but see further down this session for an example of the docker login. Also note, below, I'm giving the newly created     image a name suitable for pushing.  'dwmoore' is the login and name of my Docker Hub account;  'myalpine' is our chosen new image name.  Once the changes
+are **commit**ted and **push**ed up to the Hub, they are available in the new image, conveniently and by name, to be **pull**ed by others and instantiated in further running instances.
+ 
+If in the meantime we forgot the temporary name of our currently running instance,   we can get it again with `docker ps -a`.  The SHA or a truncated form  (**547a2b1a747b** or even just **547a**) could also be used for the randomly chosen name which the docker daemon gave to our container instance, "reverent_goldwasser"
  ```
 
  ERROR(127) 17:46PM daniel@daniel-ThinkPad-W540:~ $ docker commit reverent_goldwasser  dwmoore/myalpine
