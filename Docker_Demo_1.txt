@@ -130,8 +130,10 @@ NameError: name 'StringIO' is not defined
    #    you won't see me logging in again, but see further down this session for an
    #    example of the docker login. Also note, below, I'm giving the newly created
    #    image a name suitable for pushing.  'dwmoore' is the login and name of my
-   #    Docker Hub account
-   # ... If in the meantime we forgot the temporary name of the running instance,
+   #    Docker Hub account, and ''myalpine' will be the image name. Once established,
+   #    and pushed to the hub, the image can be downloaded, and further instances run.
+   
+   # ... If in the meantime we forgot the temporary name of our current running instance,
        #  we can get it again with "docker ps -a".  The SHA or a truncated form
        #  (547a2b1a747b or even "547a") could also be used for the randomly chosen name
        #  which the docker daemon gave to our container instance, "reverent_goldwasser"
